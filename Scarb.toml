@@ -7,6 +7,8 @@ edition = "2023_11"
 casm = true
 sierra = true
 
+[scripts]
+test = "snforge test"
 
 [dependencies]
 starknet = "2.8.2"
