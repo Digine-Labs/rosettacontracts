@@ -3,29 +3,34 @@ name: Lint build and test
 on:
   pull_request:
     branches:
-    - main
+      - main
   push:
     branches:
-    - main
+      - main
 
 jobs:
   lint_build_and_test:
     name: Lint build and test
     runs-on: ubuntu-latest
+    environment: env
     steps:
-     - name: Scarb Version Check
-       if: ${{ vars.SCARB_VERSION == '' }}
-       run: |
-         echo ${{ vars.SCARB_VERSION }}
-         echo "SCARB_VERSION is not set."
-         exit 1
-     - uses: actions/checkout@v3
-     - uses: software-mansion/setup-scarb@v1
-       with:
-         scarb-version: "${{ vars.SCARB_VERSION }}"
-     - name: Cairo lint
-       run: scarb fmt --check
-     - name: Cairo build
-       run: scarb build
-     - name: Cairo test
-       run: scarb test
+      - name: Check Scarb Version
+        if: ${{ !vars.SCARB_VERSION }}
+        run: |
+          echo "SCARB_VERSION is not set."
+          exit 1
+          
+      - uses: actions/checkout@v3
+
+      - uses: software-mansion/setup-scarb@v1
+        with:
+          scarb-version: "${{ vars.SCARB_VERSION }}"
+
+      - name: Cairo lint
+        run: scarb fmt --check
+
+      - name: Cairo build
+        run: scarb build
+
+      - name: Cairo test
+        run: scarb test
