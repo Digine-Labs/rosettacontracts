@@ -263,7 +263,7 @@ fn decode_array(ref ctx: EVMCalldata, types: Span<EVMTypes>) -> Span<felt252> {
     // 2. array başladığında burası defer offset olduğu için bir sonraki slot geliyor
     
     println!("Relative offset init: {}", ctx.relative_offset);
-    let (defer_offset, data_start_offset) = ctx.calldata.read_u256(ctx.relative_offset + ctx.offset);
+    let (defer_offset, data_start_offset) = ctx.calldata.read_u256(ctx.offset);
     if(data_start_offset % 32 != 0) {
         println!("Readed at: {}, Returned wrong offset: {}", ctx.relative_offset, data_start_offset);
         println!("ctx.offset: {}, ctx.relative_offset: {}", ctx.offset, ctx.relative_offset);
