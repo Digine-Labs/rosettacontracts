@@ -283,17 +283,9 @@ fn decode_array(ref ctx: EVMCalldata, types: Span<EVMTypes>) -> Span<felt252> {
         ctx.relative_offset = new_offset;
         // Loopun dışında array içi elemanlar dynamic mi check edilmeli
         // Eğer dynamicse yeni context açılıp offset sıfırlanabilir
-        if(has_dynamic_type(types)) {
-            let mut cloned_context = ctx.clone();
-            cloned_context.relative_offset = ctx.offset;
-            cloned_context.offset = 0;
-            println!("Relative offset set: {}", cloned_context.relative_offset);
-            let decoded_inner_type = cloned_context.decode(types);
-            decoded.append_span(decoded_inner_type);
-        } else {
-            let decoded_inner_type = ctx.decode(types);
-            decoded.append_span(decoded_inner_type);
-        }
+        let decoded_inner_type = ctx.decode(types);
+        decoded.append_span(decoded_inner_type);
+        println!("decode item {}", item_idx);
 
         item_idx += 1;
     };
