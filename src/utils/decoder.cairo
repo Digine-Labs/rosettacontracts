@@ -280,6 +280,7 @@ fn decode_array(ref ctx: EVMCalldata, types: Span<EVMTypes>) -> Span<felt252> {
     let mut decoded = array![items_length.try_into().unwrap()];
     let mut item_idx = 0;
     while item_idx < items_length {
+        ctx.relative_offset = new_offset;
         // Loopun dışında array içi elemanlar dynamic mi check edilmeli
         // Eğer dynamicse yeni context açılıp offset sıfırlanabilir
         if(has_dynamic_type(types)) {
@@ -296,6 +297,7 @@ fn decode_array(ref ctx: EVMCalldata, types: Span<EVMTypes>) -> Span<felt252> {
 
         item_idx += 1;
     };
+    ctx.relative_offset = 0;
     ctx.offset = defer_offset;
     decoded.span()
 }
