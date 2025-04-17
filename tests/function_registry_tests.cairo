@@ -43,3 +43,22 @@ fn test_register_function_initial_byte_zero() {
     assert_eq!(*directives.at(1), EVMTypes::Uint256);
     assert_eq!(entrypoint, 0x0219209e083275171774dab1df80982e9df2096516f06319c5c6d71ae0a8480c);
 }
+
+#[test]
+fn print_enums() {
+    let mut serialized: Array<felt252> = array![];
+    let sample = array![EVMTypes::Address, EVMTypes::Uint256].span();
+
+    sample.serialize(ref serialized);
+    for element in serialized {
+        println!("{:x}",element);
+    };
+
+    let fn_name: ByteArray = "transfer(address,uint256)";
+    let mut fn_name_serialized = array![];
+    fn_name.serialize(ref fn_name_serialized);
+    println!("FN NAME");
+    for element in fn_name_serialized {
+        println!("{:x}",element);
+    };
+}
