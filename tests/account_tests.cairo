@@ -1598,6 +1598,170 @@ fn test_eip1559_validate_second_nonce() {
     stop_cheat_signature_global();
     stop_cheat_nonce_global();
 }
+
+#[test]
+fn test_eip1559_multicall_execute() {
+    let eth_address: EthAddress = 0xE4306a06B19Fdc04FDf98cF3c00472f29254c0e1.try_into().unwrap();
+    let strk_receiver_1_felt: felt252 = 0x555666;
+    let strk_receiver_2_felt: felt252 = 0x111222;
+
+    let (_, account, strk) = deploy_funded_account_from_rosettanet(eth_address);
+
+    let tx = RosettanetCall {
+        to: 0x0000000000000000000000004645415455524553.try_into().unwrap(),
+        tx_type: 2,
+        nonce: 1,
+        max_priority_fee_per_gas: 13620452,
+        max_fee_per_gas: 46700970384,
+        gas_price: 0,
+        gas_limit: 28156,
+        value: 0,
+        calldata: array![
+            0x76971d7f,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000020,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000002,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000040,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000120,
+            0x02494fd97dcb965ece595376ebefa989,
+            0x07116210eed818a14970fbaa52b88255,
+            0x02f0b3c5710379609eb5495f1ecd348c,
+            0xb28167711b73609fe565a72734550354,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000060,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000003,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000555666,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000002710,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000000,
+            0x02494fd97dcb965ece595376ebefa989,
+            0x07116210eed818a14970fbaa52b88255,
+            0x02f0b3c5710379609eb5495f1ecd348c,
+            0xb28167711b73609fe565a72734550354,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000060,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000003,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000111222,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000004e20,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000000
+        ]
+            .span(),
+    };
+
+    let signature = array![
+        0x89a2a6052b877ac33bba35de642edb97,0x14e7a5bb625cb9c5f7cc2e6fbb808974, 0xee2ec7d35170dffd1282e08cc468cc0e,0x4ba16945f9c9239e1f082f2fd6efe9d, 0x1b, 0x0,0x0
+    ];
+
+    let weth = deploy_weth();
+
+    let unsigned_tx_hash: u256 = 0x9c04d3e908ccac13516704a96ce2dcc9d45520b5b763886b9f2b2bec2c0471be;
+    let generated_tx_hash: u256 = generate_tx_hash(tx);
+    assert_eq!(generated_tx_hash, unsigned_tx_hash);
+
+    start_cheat_nonce_global(tx.nonce.into());
+    start_cheat_signature_global(signature.span());
+    start_cheat_caller_address(account.contract_address, starknet::contract_address_const::<0>());
+    let execution = account.__execute__(tx);
+    stop_cheat_caller_address(account.contract_address);
+    stop_cheat_signature_global();
+    stop_cheat_nonce_global();
+
+    assert_eq!(weth.balance_of(strk_receiver_1_felt.try_into().unwrap()), 10000);
+    assert_eq!(weth.balance_of(strk_receiver_2_felt.try_into().unwrap()), 20000);
+    assert_eq!(execution, array![array![].span(), array![].span()]);
+}
+
+#[test]
+fn test_legacy_multicall_execute() {
+    let eth_address: EthAddress = 0xE4306a06B19Fdc04FDf98cF3c00472f29254c0e1.try_into().unwrap();
+    let strk_receiver_1_felt: felt252 = 0x555666;
+    let strk_receiver_2_felt: felt252 = 0x111222;
+
+    let (_, account, strk) = deploy_funded_account_from_rosettanet(eth_address);
+
+    let tx = RosettanetCall {
+        to: 0x0000000000000000000000004645415455524553.try_into().unwrap(),
+        tx_type: 0,
+        nonce: 0,
+        max_priority_fee_per_gas: 0,
+        max_fee_per_gas: 0,
+        gas_price: 45235,
+        gas_limit: 21000,
+        value: 0,
+        calldata: array![
+            0x76971d7f,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000020,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000002,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000040,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000120,
+            0x02494fd97dcb965ece595376ebefa989,
+            0x07116210eed818a14970fbaa52b88255,
+            0x02f0b3c5710379609eb5495f1ecd348c,
+            0xb28167711b73609fe565a72734550354,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000060,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000003,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000555666,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000002710,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000000,
+            0x02494fd97dcb965ece595376ebefa989,
+            0x07116210eed818a14970fbaa52b88255,
+            0x02f0b3c5710379609eb5495f1ecd348c,
+            0xb28167711b73609fe565a72734550354,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000060,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000003,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000111222,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000004e20,
+            0x00000000000000000000000000000000,
+            0x00000000000000000000000000000000
+        ]
+            .span(),
+    };
+
+    let signature = array![
+        0x948a693f899dd8be371b65689f5feaa,0xb79c80e04f0bcc92ff21ac02da45950a, 0xc5f9e9cf61218a825736499ee134dbd8,0x139807befd878ad8e8d4752b2a2e2d14, 0x1c, 0x0,0x0
+    ];
+
+    let weth = deploy_weth();
+
+    let unsigned_tx_hash: u256 = 0x86f3bfe692fc58818e8453be90a763069d54cffa4dc94fb57a84f43b2d3bf459;
+    let generated_tx_hash: u256 = generate_tx_hash(tx);
+    assert_eq!(generated_tx_hash, unsigned_tx_hash);
+
+    start_cheat_nonce_global(tx.nonce.into());
+    start_cheat_signature_global(signature.span());
+    start_cheat_caller_address(account.contract_address, starknet::contract_address_const::<0>());
+    let execution = account.__execute__(tx);
+    stop_cheat_caller_address(account.contract_address);
+    stop_cheat_signature_global();
+    stop_cheat_nonce_global();
+
+    assert_eq!(weth.balance_of(strk_receiver_1_felt.try_into().unwrap()), 10000);
+    assert_eq!(weth.balance_of(strk_receiver_2_felt.try_into().unwrap()), 20000);
+    assert_eq!(execution, array![array![].span(), array![].span()]);
+}
 // TODO NONCE DIFFERENT VALIDATION
 // TODO MULTICALL LEGACY VALIDATION
 // TODO: Multicall execution tests
